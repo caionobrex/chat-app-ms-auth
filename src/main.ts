@@ -11,6 +11,6 @@ async function bootstrap() {
     options: { port: configService.get<number>('PORT') },
   });
   await app.startAllMicroservices();
-  await app.listen(configService.get<number>('PORT'));
+  await app.listen(3000);
 }
 bootstrap();
