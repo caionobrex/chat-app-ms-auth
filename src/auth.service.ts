@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -17,6 +18,8 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger = new Logger(AuthService.name);
+
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @Inject('CHAT_SERVICE') private readonly chatService: ClientProxy,
@@ -38,6 +41,7 @@ export class AuthService {
   }
 
   async login(data: LoginRequestDto): Promise<LoginResponseDto> {
+    this.logger.log('Login in user');
     const user: User = await this.usersRepository.findOneBy({
       email: data.user,
     });
