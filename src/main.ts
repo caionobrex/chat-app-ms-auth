@@ -8,9 +8,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.connectMicroservice({
     transport: Transport.TCP,
-    options: { port: configService.get<number>('PORT') },
+    options: { port: configService.get<number>('MS_PORT') },
   });
   await app.startAllMicroservices();
-  await app.listen(configService.get<number>('MS_PORT'));
+  await app.listen(configService.get<number>('PORT'));
 }
 bootstrap();
