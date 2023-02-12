@@ -6,22 +6,10 @@ import { LoginResponseDto } from './dtos/login-response.dto';
 import { RefreshTokenRequestDto } from './dtos/refresh-token-request.dto';
 import { RegisterRequestDto } from './dtos/register-request.dto';
 import { RegisterResponseDto } from './dtos/register-response.dto';
-import { VerifyTokenRequestDto } from './dtos/verify-token-request.dto';
-import { User } from './entities/user.entity';
 
 @Controller()
 export class AuthController {
   constructor(private readonly appService: AuthService) {}
-
-  @MessagePattern({ cmd: 'verify-jwt' })
-  verifyJwt(@Payload() payload: VerifyTokenRequestDto): Promise<any> {
-    return this.appService.verifyJwt(payload.jwt);
-  }
-
-  @MessagePattern({ cmd: 'get-user-by-id' })
-  async getUserById(@Payload() data: { userId: number }): Promise<User> {
-    return this.appService.getUserById(data.userId);
-  }
 
   @MessagePattern({ cmd: 'refresh-token' })
   async refreshToken(@Payload() data: RefreshTokenRequestDto) {

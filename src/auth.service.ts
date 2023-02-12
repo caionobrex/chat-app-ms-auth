@@ -29,20 +29,6 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  verifyJwt(jwt: string): any {
-    try {
-      return this.jwtService.verify(jwt);
-    } catch (err) {
-      return null;
-    }
-  }
-
-  async getUserById(userId: number): Promise<User> {
-    const user: User = await this.usersRepository.findOneBy({ id: userId });
-    delete user.password;
-    return user;
-  }
-
   refreshToken(refreshToken: string): RefreshTokenResponseDto {
     try {
       const { id, email } = this.jwtService.verify(refreshToken, {
