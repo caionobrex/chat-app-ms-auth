@@ -15,6 +15,8 @@ import { RegisterResponseDto } from './dtos/register-response.dto';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { RefreshTokenResponseDto } from './dtos/refresh-token-response.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +25,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @Inject('CHAT_SERVICE') private readonly chatService: ClientProxy,
-    private jwtService: JwtService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
   ) {}
 
   verifyJwt(jwt: string): any {
@@ -40,6 +43,32 @@ export class AuthService {
     return user;
   }
 
+  refreshToken(refreshToken: string): RefreshTokenResponseDto {
+    try {
+      const { id, email } = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+      });
+      return {
+        token: this.jwtService.sign({
+          id,
+          email,
+        }),
+        refreshToken: this.jwtService.sign(
+          {
+            id,
+            email,
+          },
+          {
+            expiresIn: '2h',
+            secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+          },
+        ),
+      };
+    } catch (err) {
+      throw new UnauthorizedException();
+    }
+  }
+
   async login(data: LoginRequestDto): Promise<LoginResponseDto> {
     this.logger.log('Login in user');
     const user: User = await this.usersRepository.findOneBy({
@@ -52,6 +81,16 @@ export class AuthService {
         id: user.id,
         email: user.email,
       }),
+      refreshToken: this.jwtService.sign(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        {
+          expiresIn: '2h',
+          secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        },
+      ),
     };
   }
 
@@ -73,6 +112,13 @@ export class AuthService {
     return {
       user,
       token: this.jwtService.sign({ id: user.id, email: user.email }),
+      refreshToken: this.jwtService.sign(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        { expiresIn: '2h' },
+      ),
     };
   }
 }

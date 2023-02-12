@@ -5,5 +5,7 @@ export class RegisterResponseDto {
 
   token?: string;
 
+  refreshToken?: string;
+
   message?: string;
 }
